@@ -1241,6 +1241,10 @@ async function init() {
 
   document.getElementById('loading-bar').classList.add('hidden');
 
+  // Indication d'exploration 3D pour les visiteurs peu familiers (après un court
+  // délai pour laisser la scène s'afficher).
+  setTimeout(() => { flashExploreHint(); }, 700);
+
   // ========================================================================
   //  COMPOSITING / ÉTALONNAGE RÉALISTE  (post-traitement caméra)
   //  AO de contact + tone mapping filmique ACES + étalonnage couleur
@@ -2074,11 +2078,11 @@ function enterPanoramaCamera(eyePos, lookAt) {
   if (!fpCamera) {
     fpCamera = new BABYLON.UniversalCamera('fpCamera', eyePos.clone(), scene);
     fpCamera.minZ = 0.05;
-    fpCamera.inertia = 0.85;
-    fpCamera.angularSensibility = 2500; // rotation souris POV (diviseur ; plus bas = plus dynamique)
+    fpCamera.inertia = 0.35;             // faible inertie → la rotation s'arrête net quand le doigt/la souris s'arrête (plus de dérive)
+    fpCamera.angularSensibility = 2000;  // rotation souris POV (diviseur ; plus bas = plus rapide) — un peu plus vive
     // Rotation TACTILE (tablette/téléphone) : c'est CE paramètre qui compte en POV,
     // pas angularSensibility. Défaut Babylon ≈ 200000 (très lent) → on l'abaisse fort.
-    fpCamera.touchAngularSensibility = 12000;
+    fpCamera.touchAngularSensibility = 9000; // un peu plus rapide au doigt (plus bas = plus rapide)
     fpCamera.speed = 0;                  // aucun déplacement
     fpCamera.keysUp = []; fpCamera.keysDown = []; fpCamera.keysLeft = []; fpCamera.keysRight = [];
     // Souris : seulement le clic gauche pour pivoter, aucune translation
@@ -2118,10 +2122,17 @@ function enterPanoramaCamera(eyePos, lookAt) {
 
   fpCamera.viewport = new BABYLON.Viewport(0, 0, getEffectiveViewportWidth(), 1);
 
-  // ========== PANORAMIC COMPLET (haut/bas/gauche/droite) - supprimer le verrouillage du pitch ==========
-  // Le mouvement vertical est maintenant autorisé
+  // ========== PANORAMIC (haut/bas/gauche/droite) avec garde-fou vertical ==========
+  // On autorise le regard vers le haut et vers le bas, mais on empêche le
+  // retournement complet (tête en bas) qui rend la vue illisible. Le pitch est
+  // clampé en douceur entre presque -90° et +90°.
   if (fpPitchObserver) scene.onBeforeRenderObservable.remove(fpPitchObserver);
-  fpPitchObserver = null; // Pas de verrouillage
+  const PITCH_MAX = Math.PI / 2 - 0.08; // ~85° vers le haut et vers le bas
+  fpPitchObserver = scene.onBeforeRenderObservable.add(() => {
+    if (fpCamera.rotation.x >  PITCH_MAX) fpCamera.rotation.x =  PITCH_MAX;
+    if (fpCamera.rotation.x < -PITCH_MAX) fpCamera.rotation.x = -PITCH_MAX;
+    fpCamera.rotation.z = 0; // jamais de roulis
+  });
 
   camera.detachControl();
   scene.activeCamera = fpCamera;
@@ -2444,6 +2455,20 @@ function flashLookHint() {
     : 'Cliquez-glissez pour regarder autour';
   hint.classList.add('show');
   setTimeout(() => hint.classList.remove('show'), 3600);
+}
+
+/* Indication affichée à l'arrivée sur la vue 3D (au chargement) : invite les
+   visiteurs peu familiers de la 3D à explorer le modèle. Réutilise la pastille
+   du hint POV. Message adapté tactile / souris. */
+function flashExploreHint() {
+  const hint = document.getElementById('fp-look-hint');
+  if (!hint) return;
+  const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  hint.textContent = isTouch
+    ? '👆 Explorez en 3D : glissez pour tourner, pincez pour zoomer'
+    : '🖱️ Explorez en 3D : glissez pour tourner, molette pour zoomer';
+  hint.classList.add('show');
+  setTimeout(() => hint.classList.remove('show'), 5000);
 }
 
 /* (Re)construit la liste de boutons de pièces dans le panneau droite */
