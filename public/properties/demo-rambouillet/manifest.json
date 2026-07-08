@@ -50,11 +50,10 @@
       "roomId": "cuisine",
       "description": "Cuisine équipée avec plan de travail en quartz, électroménager encastré et rangements sur-mesure. Exposition lumineuse le matin.",
       "photos": [
-        "cuisine-1.jpg",
-        "cuisine-2.jpg",
-        "cuisine-3.jpg"
+        "Cuisine_01.png",
+        "Cuisine_02.png"
       ],
-      "image": "cuisine.jpg",
+      "image": "Cuisine_01.png",
       "camPos": [
         -3.57,
         1.7,
@@ -72,9 +71,9 @@
       "roomId": "entree",
       "description": "Entrée avec rangements et accès direct aux pièces de vie.",
       "photos": [
-        "entree-1.jpg"
+        "Entree_01.png"
       ],
-      "image": "entree.jpg",
+      "image": "Entree_01.png",
       "camPos": [
         4.26,
         1.7,
@@ -92,10 +91,9 @@
       "roomId": "salon",
       "description": "Vaste salon traversant avec parquet point de Hongrie, double exposition et accès direct au balcon.",
       "photos": [
-        "salon-1.jpg",
-        "salon-2.jpg"
+        "Salon_01.png"
       ],
-      "image": "salon.jpg",
+      "image": "Salon_01.png",
       "camPos": [
         -5.21,
         1.7,
@@ -113,9 +111,9 @@
       "roomId": "grande chambre",
       "description": "Chambre parentale avec dressing et grande fenêtre donnant sur l'extérieur.",
       "photos": [
-        "grandechambre-1.jpg"
+        "Grandechambre_01.png"
       ],
-      "image": "chambre-1.jpg",
+      "image": "Grandechambre_01.png",
       "camPos": [
         6.98,
         1.7,
@@ -133,9 +131,9 @@
       "roomId": "petite chambre",
       "description": "Seconde chambre, idéale en bureau ou chambre d'enfant.",
       "photos": [
-        "petitechambre-1.jpg"
+        "Petitechambre_01.png"
       ],
-      "image": "chambre-2.jpg",
+      "image": "Petitechambre_01.png",
       "camPos": [
         3.29,
         1.7,
@@ -153,9 +151,9 @@
       "roomId": "salledebain",
       "description": "Salle de bain avec double vasque, douche à l'italienne et meuble suspendu.",
       "photos": [
-        "salledebain-1.jpg"
+        "Salledebain_01.png"
       ],
-      "image": "salle-bain.jpg",
+      "image": "Salledebain_01.png",
       "camPos": [
         4.76,
         1.7,
@@ -173,9 +171,9 @@
       "roomId": "toilette",
       "description": "WC séparé avec lave-mains.",
       "photos": [
-        "toilette-1.jpg"
+        "Toilette_01.png"
       ],
-      "image": "toilettes.jpg",
+      "image": "Toilette_01.png",
       "camPos": [
         1.8,
         1.7,
@@ -190,11 +188,12 @@
     {
       "id": "balcon",
       "label": "Balcon",
+      "roomId": "balcon",
       "description": "Balcon orienté sud, sans vis-à-vis.",
       "photos": [
-        "balcon-1.jpg"
+        "Balcon_01.png"
       ],
-      "image": "balcon.jpg",
+      "image": "Balcon_01.png",
       "camPos": [
         -0.1,
         1.7,
