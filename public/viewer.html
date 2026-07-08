@@ -390,18 +390,19 @@
 
     .fp-back-btn {
       margin-top: 0.4rem;
-      padding: 0.75rem 1rem;
-      background: #0B1B3F;
+      padding: 0.85rem 1.2rem;
+      background: #0046FE;
       color: #fff;
       border: none;
       border-radius: 999px;
       cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 0.98rem;
+      font-weight: 700;
       font-family: inherit;
-      transition: background 0.2s;
+      box-shadow: 0 4px 14px rgba(0,70,254,0.45);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
     }
-    .fp-back-btn:hover { background: #16306b; }
+    .fp-back-btn:hover { background: #0038cc; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,70,254,0.55); }
 
     /* Indication "regarder autour" en vue 1ère personne */
     .fp-look-hint {
@@ -2521,6 +2522,18 @@ function flashExploreHint() {
   setTimeout(() => hint.classList.remove('show'), 5000);
 }
 
+/* Indication affichée à l'entrée en vue de dessus (plan). */
+function flashTopViewHint() {
+  const hint = document.getElementById('fp-look-hint');
+  if (!hint) return;
+  const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  hint.textContent = isTouch
+    ? '🗺️ Vue de dessus : touchez une pièce dans le menu pour la visiter'
+    : '🗺️ Vue de dessus : cliquez une pièce dans le menu pour la visiter';
+  hint.classList.add('show');
+  setTimeout(() => hint.classList.remove('show'), 5000);
+}
+
 /* (Re)construit la liste de boutons de pièces dans le panneau droite */
 function rebuildPoiList() {
   const panel = document.getElementById('poi-panel');
@@ -2958,6 +2971,7 @@ function playTopViewAnimation() {
       isTopView = true;
       updateToggleButton();
       setHudVisible(true); // affiche le HUD plan (cotations + pièces)
+      setTimeout(() => { flashTopViewHint(); }, 300);
       console.log('✅ Vue de dessus — clique le bouton pour revenir en navigation');
     }
   });
