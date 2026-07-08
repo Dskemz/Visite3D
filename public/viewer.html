@@ -1097,7 +1097,7 @@ async function init() {
     const hdrTexture = new BABYLON.HDRCubeTexture(hdriUrl, scene, 512);
     hdrTexture.onLoadObservable.add(() => {
       scene.environmentTexture = hdrTexture;
-      scene.environmentIntensity = 1.35;  // intensité réflexions/IBL (relevée : principal levier de réalisme PBR)
+      scene.environmentIntensity = 1.25;  // intensité réflexions/IBL (légèrement relevée pour le réalisme)
 
       // NB : le tone mapping / exposition / contraste sont gérés UNIQUEMENT par le
       // bloc GRADE + pipeline (plus bas). On ne les réécrit plus ici, sinon ce
@@ -1153,7 +1153,7 @@ async function init() {
     enabled:   true,
     color:     [1.0, 0.94, 0.82], // teinte chaude par défaut (si non défini dans le JSON)
     shadows:   true,              // ⬅️ passer à false si les ombres gênent / artefacts
-    darkness:  0.40,              // 0 = ombre noire, 1 = pas d'ombre. ~0.40 = un peu plus de modelé, toujours douce
+    darkness:  0.45,              // 0 = ombre noire, 1 = pas d'ombre. ~0.45 = douce/réaliste
   };
 
   const dl = lightConfig.directionalLight;
@@ -1256,31 +1256,29 @@ async function init() {
   // ========================================================================
   const GRADE = {
     exposure:   1.18,    // exposition globale (monter si trop sombre)
-    contrast:   1.38,    // adouci (1.55 écrasait les ombres) → détail conservé, rendu photo d'archi
+    contrast:   1.55,    // ↑ contraste légèrement augmenté (rendu plus réaliste)
     toneMapping:'ACES',  // 'ACES' (filmique, réaliste) ou 'STANDARD'
 
-    // Étalonnage couleur : ombres froides / hautes lumières chaudes — dosé "murmure"
-    // (densités réduites) pour rester réaliste et éviter le look cinéma teal-orange.
-    satGlobal:         8,
-    shadowsHue:      220, shadowsDensity:    10, shadowsSaturation:     0,
-    highlightsHue:    32, highlightsDensity:  7, highlightsSaturation: -5,
+    // Étalonnage couleur cinéma : ombres froides / hautes lumières chaudes
+    satGlobal:        12,
+    shadowsHue:      220, shadowsDensity:    14, shadowsSaturation:     0,
+    highlightsHue:    32, highlightsDensity: 10, highlightsSaturation: -8,
 
-    // Bloom : diffusion lumineuse sur les zones très claires (fenêtres, lampes) — discret
-    bloom: true, bloomThreshold: 0.80, bloomWeight: 0.15, bloomKernel: 64, bloomScale: 0.5,
+    // Bloom : diffusion lumineuse sur les zones très claires (fenêtres, lampes)
+    bloom: true, bloomThreshold: 0.82, bloomWeight: 0.18, bloomKernel: 64, bloomScale: 0.5,
 
-    // Netteté → contraste perçu (modérée : au-delà, halos = amateur)
-    sharpenEdge: 0.28, sharpenColor: 1.0,
+    // Netteté → contraste perçu
+    sharpenEdge: 0.30, sharpenColor: 1.0,
 
-    // Vignette (profondeur / focalisation) — DISCRÈTE : une vignette lourde = look filtre.
-    vignette: true, vignetteWeight: 1.3,
+    // Vignette (profondeur / focalisation)
+    vignette: true, vignetteWeight: 2.4,
 
-    // Grain photographique : léger, casse le banding sur les aplats + texture réaliste.
-    // 0 = désactivé. ~6 = subtil. Live : window.compositingPipeline.grain.intensity
-    grain: 6,
+    // Grain filmique (réduit le banding) — 0 = désactivé (évite le "bruit partout")
+    grain: 0,
 
-    // AO de contact (SSAO2) — assombrit les angles/coins. Recâblé conservateur + rattaché
-    // aux 2 caméras. Si artefact plein écran sur GPU ancien : repasser à false.
-    ao: true,
+    // AO de contact (SSAO2). OFF par défaut : combiné au pipeline + MSAA il provoque
+    // des artefacts plein écran. À réactiver seulement après test (voir note).
+    ao: false,
   };
 
   // --- 1) AMBIENT OCCLUSION DE CONTACT (SSAO2, WebGL2) — optionnel ---
@@ -1291,13 +1289,12 @@ async function init() {
       if (BABYLON.SSAO2RenderingPipeline && engine.webGLVersion > 1) {
         const ssao2 = new BABYLON.SSAO2RenderingPipeline('ssao2', scene,
           { ssaoRatio: 0.5, blurRatio: 1 }, [camera]);
-        ssao2.radius        = 1.4;   // calé sur l'échelle des pièces (mètres)
-        ssao2.totalStrength = 0.85;  // dosé (1.1 lavait toute l'image)
-        ssao2.base          = 0.25;  // ↑ = seuls les angles/coins s'assombrissent, pas le plein écran
+        ssao2.radius        = 0.9;
+        ssao2.totalStrength = 1.1;
+        ssao2.base          = 0.1;
         ssao2.samples       = 16;
-        ssao2.maxZ          = 60;    // borne de profondeur resserrée pour un intérieur
-        ssao2.expensiveBlur = false; // blur léger : moins de risque d'artefact plein écran
-        window.ssao2Pipeline = ssao2; // réglages live + rattachement fpCamera
+        ssao2.maxZ          = 100;
+        ssao2.expensiveBlur = true;
         console.log('✅ SSAO2 (occlusion de contact) activé');
       } else {
         console.log('ℹ️ SSAO2 indisponible (WebGL1) — AO ignoré');
@@ -2111,16 +2108,11 @@ function enterPanoramaCamera(eyePos, lookAt) {
     // vignette et netteté sont désormais strictement identiques dans les 2 vues.
     try {
       if (scene.postProcessRenderPipelineManager) {
-        // AO de contact d'abord (assombrit les angles), puis le compositing par-dessus.
-        if (window.ssao2Pipeline) {
-          scene.postProcessRenderPipelineManager
-            .attachCamerasToRenderPipeline('ssao2', fpCamera);
-        }
         scene.postProcessRenderPipelineManager
           .attachCamerasToRenderPipeline('compositing', fpCamera);
       }
     } catch (e) {
-      console.warn('⚠️ Post-traitement non rattaché à la fpCamera :', e.message);
+      console.warn('⚠️ Compositing non rattaché à la fpCamera :', e.message);
     }
   }
   fpCamera.position.copyFrom(eyePos);

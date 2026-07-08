@@ -1,0 +1,67 @@
+# Blender 5.1.2 MTL File: 'Appartement_Test.blend'
+# www.blender.org
+
+newmtl M_Carrelage_blanc
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Cuisine/DefaultMaterial_Base_color.png
+map_Ns J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Cuisine/DefaultMaterial_Roughness.png
+map_Bump -bm 1.000000 J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Cuisine/DefaultMaterial_Normal_OpenGL.png
+
+newmtl M_Coupe
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.011108 0.011108 0.011108
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl M_Parquet
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Salon/DefaultMaterial_Base_color.png
+map_Ns J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Salon/DefaultMaterial_Roughness.png
+map_refl J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Salon/DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 J:/Projet_Visite_Virtuelle/Blender/Textures/Sols/Salon/DefaultMaterial_Normal_OpenGL.png
+
+newmtl M_balcon
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd E:/LIBRARY/TEXTURE_PROCEDURAL/ConcretCast_4k/DefaultMaterial_Base_color.jpg
+map_Ns E:/LIBRARY/TEXTURE_PROCEDURAL/ConcretCast_4k/DefaultMaterial_Roughness.jpg
+map_refl E:/LIBRARY/TEXTURE_PROCEDURAL/ConcretCast_4k/DefaultMaterial_Metallic.jpg
+map_Bump -bm 1.000000 E:/LIBRARY/TEXTURE_PROCEDURAL/ConcretCast_4k/DefaultMaterial_Normal_OpenGL.jpg
+
+newmtl M_sol_Cuisine
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl M_sol_cuisine
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
