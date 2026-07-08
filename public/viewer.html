@@ -65,6 +65,32 @@
       margin-bottom: 0.8rem; padding-bottom: 0.6rem;
       border-bottom: 2px solid #0046FE;
     }
+
+    /* ====== SOUS-MENUS REPLIABLES (téléphone uniquement) ======
+       Sur desktop/tablette : les <details> restent toujours ouverts et sans
+       flèche (rendu identique à avant). Sur téléphone : on peut plier/déplier
+       « Éléments par pièce » et « Visiter les pièces » d'un tap sur le titre. */
+    .collapsible > summary { list-style: none; cursor: default; }
+    .collapsible > summary::-webkit-details-marker { display: none; }
+    .collapse-arrow { display: none; }
+    /* Desktop/tablette : toujours ouvert, clic sur le titre sans effet. */
+    @media (min-width: 901px) {
+      .collapsible[open] > summary { pointer-events: none; }
+      .collapsible > summary button { pointer-events: auto; }
+    }
+    @media (max-width: 900px) {
+      .collapsible > summary {
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 0.6rem; -webkit-tap-highlight-color: transparent; user-select: none;
+      }
+      .collapse-arrow {
+        display: inline-block; flex: 0 0 auto;
+        width: 18px; height: 18px; color: #fff;
+        transition: transform 0.22s ease;
+      }
+      .collapsible[open] > summary .collapse-arrow { transform: rotate(180deg); }
+    }
     .room-section-title { color: #0B1B3F; font-size: 0.92rem; font-weight: 600; margin: 0; }
     .room-allnone { display: flex; gap: 0.4rem; }
     .room-allnone button {
@@ -2415,28 +2441,33 @@ function rebuildPoiList() {
   const pois = propertyData && propertyData.poi ? propertyData.poi : [];
   panel.innerHTML = `
     ${renderRoomSwitchesHTML()}
-    <h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin-bottom:0.9rem;border-bottom:2px solid rgba(255,255,255,0.18);padding-bottom:0.6rem;">Visiter les pièces</h3>
-    <div class="poi-container" id="poi-list" style="flex:1;overflow-y:auto;">
-      ${pois.map(poi => {
-        const hasPhotos = (Array.isArray(poi.photos) && poi.photos.length) || !!poi.image;
-        // .poi-btn : titre (desktop = bouton POV inchangé ; téléphone = titre de carte).
-        // .poi-item-acts : visible UNIQUEMENT sur téléphone (Vue 3D + Photos).
-        return `
-        <div class="poi-item">
-          <button class="poi-btn" id="poi-${poi.id}" onclick="goToPOI('${poi.id}')">${poi.label}</button>
-          <div class="poi-item-acts">
-            <button class="poi-mini poi-mini-pov" onclick="event.stopPropagation(); goToPOI('${poi.id}')" title="Vue immersive 3D">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
-              Vue 3D
-            </button>
-            ${hasPhotos ? `<button class="poi-mini poi-mini-photo" onclick="event.stopPropagation(); openPhotosFromMenu('${poi.id}')" title="Photos de la pièce">
-              <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="10" r="1.6" fill="currentColor"/><path d="M21 16l-5-5-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Photos
-            </button>` : ''}
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
+    <details class="collapsible" open>
+      <summary>
+        <h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0;border-bottom:2px solid rgba(255,255,255,0.18);padding-bottom:0.6rem;flex:1;">Visiter les pièces</h3>
+        <svg class="collapse-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="poi-container" id="poi-list" style="flex:1;overflow-y:auto;padding-top:0.7rem;">
+        ${pois.map(poi => {
+          const hasPhotos = (Array.isArray(poi.photos) && poi.photos.length) || !!poi.image;
+          // .poi-btn : titre (desktop = bouton POV inchangé ; téléphone = titre de carte).
+          // .poi-item-acts : visible UNIQUEMENT sur téléphone (Vue 3D + Photos).
+          return `
+          <div class="poi-item">
+            <button class="poi-btn" id="poi-${poi.id}" onclick="goToPOI('${poi.id}')">${poi.label}</button>
+            <div class="poi-item-acts">
+              <button class="poi-mini poi-mini-pov" onclick="event.stopPropagation(); goToPOI('${poi.id}')" title="Vue immersive 3D">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                Vue 3D
+              </button>
+              ${hasPhotos ? `<button class="poi-mini poi-mini-photo" onclick="event.stopPropagation(); openPhotosFromMenu('${poi.id}')" title="Photos de la pièce">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="10" r="1.6" fill="currentColor"/><path d="M21 16l-5-5-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Photos
+              </button>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </details>
   `;
 }
 
@@ -2462,16 +2493,21 @@ function renderRoomSwitchesHTML() {
       </div>`;
   }).join('');
   return `
-    <div class="room-section">
-      <div class="room-section-head">
-        <h4 class="room-section-title">Éléments par pièce</h4>
-        <div class="room-allnone">
-          <button onclick="setAllRooms(true)">Tout</button>
-          <button onclick="setAllRooms(false)">Aucun</button>
+    <details class="collapsible room-section" open>
+      <summary>
+        <div class="room-section-head" style="flex:1;margin-bottom:0;padding-bottom:0;border-bottom:none;">
+          <h4 class="room-section-title" style="color:#fff;">Éléments par pièce</h4>
+          <div class="room-allnone">
+            <button onclick="event.preventDefault();event.stopPropagation();setAllRooms(true)">Tout</button>
+            <button onclick="event.preventDefault();event.stopPropagation();setAllRooms(false)">Aucun</button>
+          </div>
         </div>
+        <svg class="collapse-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div style="border-top:2px solid #0046FE;padding-top:0.7rem;margin-top:0.5rem;">
+        ${rows}
       </div>
-      ${rows}
-    </div>`;
+    </details>`;
 }
 
 /* ====== LIGHTBOX AVEC NAVIGATION PHOTOS ====== */
