@@ -943,6 +943,9 @@ let povPinchActive = false;   // true pendant un pincement 2 doigts (mobile)
 let povPinchStartDist = 0;    // distance initiale entre les 2 doigts
 let povPinchStartFov = 0;     // FOV au début du pincement
 let povTouchHandlers = null;  // {down, move, up} pour pouvoir les retirer à la sortie
+let povLookActive = false;    // true pendant un glissement 1 doigt (rotation de la vue)
+let povLastTouchX = 0;        // dernière position X du doigt (pour le delta de rotation)
+let povLastTouchY = 0;        // dernière position Y du doigt
 let savedRadiusLimits = null; // sauvegarde des limites de zoom hors 1ère personne
 let defaultFov = 0.8; // FOV de navigation (sauvegardé au boot, restauré à la sortie du 1ère personne)
 
@@ -2080,9 +2083,15 @@ function enterPanoramaCamera(eyePos, lookAt) {
     fpCamera.minZ = 0.05;
     fpCamera.inertia = 0.35;             // faible inertie → la rotation s'arrête net quand le doigt/la souris s'arrête (plus de dérive)
     fpCamera.angularSensibility = 2000;  // rotation souris POV (diviseur ; plus bas = plus rapide) — un peu plus vive
-    // Rotation TACTILE (tablette/téléphone) : c'est CE paramètre qui compte en POV,
-    // pas angularSensibility. Défaut Babylon ≈ 200000 (très lent) → on l'abaisse fort.
-    fpCamera.touchAngularSensibility = 9000; // un peu plus rapide au doigt (plus bas = plus rapide)
+    // Rotation TACTILE : gérée manuellement (voir enablePovTouchLook) pour que le
+    // glissement d'UN doigt fasse tourner la vue dans les DEUX axes (gauche/droite
+    // ET haut/bas). L'input tactile natif de Babylon ne gère bien que l'axe X, on
+    // le retire donc pour éviter les conflits.
+    try {
+      if (fpCamera.inputs && fpCamera.inputs.attached && fpCamera.inputs.attached.touch) {
+        fpCamera.inputs.removeByType('FreeCameraTouchInput');
+      }
+    } catch (e) { /* selon version Babylon, l'input peut porter un autre nom */ }
     fpCamera.speed = 0;                  // aucun déplacement
     fpCamera.keysUp = []; fpCamera.keysDown = []; fpCamera.keysLeft = []; fpCamera.keysRight = [];
     // Souris : seulement le clic gauche pour pivoter, aucune translation
@@ -2139,9 +2148,12 @@ function enterPanoramaCamera(eyePos, lookAt) {
   fpCamera.attachControl(document.getElementById('canvas'), true);
 
   // ========== POV EN GRAND ANGLE FIXE ==========
-  // Vue POV toujours en grand angle (plus simple et plus lisible). Pas de zoom
-  // molette/pincement : le FOV reste constant.
+  // Vue POV toujours en grand angle (plus simple et plus lisible).
   fpCamera.fov = CONFIG.firstPersonFovWide;
+
+  // Active la rotation tactile personnalisée (1 doigt = la vue suit le doigt dans
+  // les deux axes), le pincement 2 doigts (zoom) et la molette (PC).
+  enablePovZoom();
 }
 
 /* Borne le FOV de la caméra POV entre l'ouverture de base (zoom max) et le grand angle. */
@@ -2166,40 +2178,78 @@ function enablePovZoom() {
   };
   canvas.addEventListener('wheel', povWheelObserver, { passive: false });
 
-  // --- Pincement 2 doigts (mobile) ---
+  // --- Tactile : 1 doigt = rotation (yaw + pitch), 2 doigts = pincement zoom ---
   const dist2 = (t) => {
     const dx = t[0].clientX - t[1].clientX;
     const dy = t[0].clientY - t[1].clientY;
     return Math.hypot(dx, dy);
   };
+  // Sensibilité de la rotation tactile : radians par pixel de déplacement du doigt.
+  // Plus la valeur est haute, plus la vue tourne vite. La vue "suit le doigt".
+  const TOUCH_LOOK_SPEED = 0.0042;
+  const PITCH_LIMIT = Math.PI / 2 - 0.08; // ~85° : empêche le retournement complet
+
   const onTouchStart = (ev) => {
     if (!isFirstPerson || !fpCamera) return;
-    if (ev.touches.length === 2) {
+    if (ev.touches.length === 1) {
+      // Début d'un glissement à un doigt → on mémorise la position de départ.
+      povPinchActive = false;
+      povLookActive = true;
+      povLastTouchX = ev.touches[0].clientX;
+      povLastTouchY = ev.touches[0].clientY;
+    } else if (ev.touches.length === 2) {
+      // Deux doigts → pincement zoom, on suspend la rotation.
+      povLookActive = false;
       povPinchActive = true;
       povPinchStartDist = dist2(ev.touches);
       povPinchStartFov = fpCamera.fov;
-      // Détache la rotation caméra pendant le pincement pour éviter que le 2e doigt
-      // ne fasse pivoter la vue en même temps qu'on zoome.
-      try { fpCamera.detachControl(); } catch (e) {}
     }
   };
+
   const onTouchMove = (ev) => {
-    if (!isFirstPerson || !fpCamera || !povPinchActive) return;
-    if (ev.touches.length === 2) {
-      ev.preventDefault(); // empêche le scroll/zoom natif du navigateur
+    if (!isFirstPerson || !fpCamera) return;
+
+    // Rotation à un doigt : la vue suit le doigt (gauche/droite ET haut/bas).
+    if (povLookActive && ev.touches.length === 1) {
+      ev.preventDefault();
+      const t = ev.touches[0];
+      const dx = t.clientX - povLastTouchX;
+      const dy = t.clientY - povLastTouchY;
+      povLastTouchX = t.clientX;
+      povLastTouchY = t.clientY;
+      // Glisser vers la droite → la vue tourne vers la droite ; glisser vers le
+      // haut → on lève la tête. (Signe choisi pour un rendu naturel "la vue suit".)
+      fpCamera.rotation.y += dx * TOUCH_LOOK_SPEED;
+      fpCamera.rotation.x += dy * TOUCH_LOOK_SPEED;
+      // Garde-fou vertical : pas de retournement.
+      if (fpCamera.rotation.x >  PITCH_LIMIT) fpCamera.rotation.x =  PITCH_LIMIT;
+      if (fpCamera.rotation.x < -PITCH_LIMIT) fpCamera.rotation.x = -PITCH_LIMIT;
+      fpCamera.rotation.z = 0;
+      return;
+    }
+
+    // Pincement à deux doigts : zoom (FOV).
+    if (povPinchActive && ev.touches.length === 2) {
+      ev.preventDefault();
       const d = dist2(ev.touches);
-      // Écarter les doigts (d augmente) → on zoome → FOV diminue
       const delta = (d - povPinchStartDist) * CONFIG.povPinchSensitivity;
       fpCamera.fov = clampPovFov(povPinchStartFov - delta);
     }
   };
+
   const onTouchEnd = (ev) => {
-    if (ev.touches.length < 2 && povPinchActive) {
+    if (ev.touches.length === 0) {
+      povLookActive = false;
       povPinchActive = false;
-      // Réattache la rotation à 1 doigt une fois le pincement terminé.
-      try { fpCamera.attachControl(document.getElementById('canvas'), true); } catch (e) {}
+    } else if (ev.touches.length === 1) {
+      // On repasse d'un pincement à un doigt : reprendre la rotation depuis ce doigt.
+      povPinchActive = false;
+      povLookActive = true;
+      povLastTouchX = ev.touches[0].clientX;
+      povLastTouchY = ev.touches[0].clientY;
     }
   };
+
   canvas.addEventListener('touchstart', onTouchStart, { passive: false });
   canvas.addEventListener('touchmove', onTouchMove, { passive: false });
   canvas.addEventListener('touchend', onTouchEnd, { passive: true });
