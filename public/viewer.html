@@ -723,7 +723,7 @@
   <!-- HUD PLAN (cotations + noms de pièces) — visible en vue de dessus uniquement -->
   <svg id="hud-svg" xmlns="http://www.w3.org/2000/svg"
        style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; opacity:0; transition:opacity .35s ease; z-index:100;">
-    <g id="hud-content"></g>
+    <g id="hud-content" style="pointer-events:none;"></g>
   </svg>
 
   <!-- HEADER (topbar) -->
@@ -3650,9 +3650,9 @@ function resetPlacement() {
 
   const mqMobile   = window.matchMedia('(max-width: 900px)');
   const mqPortrait = window.matchMedia('(orientation: portrait)');
+  const mqTablet   = window.matchMedia('(max-width: 1200px)');
   const isMobile   = () => mqMobile.matches;
-  const mqTablet   = window.matchMedia && window.matchMedia('(max-width: 1200px)').matches;
-  const isTablet   = () => mqTablet;  // tablette: 900px < width <= 1200px
+  const isTablet   = () => mqTablet.matches;  // tablette: 900px < width <= 1200px
   const isMobile_strict = () => isMobile() && !isTablet();  // mobile <900px seulement
   const isPortrait = () => mqPortrait.matches;
 
