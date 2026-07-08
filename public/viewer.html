@@ -722,7 +722,7 @@
 <div id="ui-overlay">
   <!-- HUD PLAN (cotations + noms de pièces) — visible en vue de dessus uniquement -->
   <svg id="hud-svg" xmlns="http://www.w3.org/2000/svg"
-       style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; opacity:0; transition:opacity .35s ease; z-index:100;">
+       style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; opacity:0; transition:opacity .35s ease;">
     <g id="hud-content" style="pointer-events:none;"></g>
   </svg>
 
@@ -3157,17 +3157,14 @@ function hudDrawMask(g, Q) {
   const path = svgEl('path', {
     d, 'fill-rule': 'evenodd', fill: HUD.maskColor, 'fill-opacity': HUD.maskOpacity
   });
-  path.style.pointerEvents = 'auto';
-  path.style.cursor = 'pointer';
-  path.onclick = () => { hudIsolatedRoom = null; hudUpdate(); }; // clic sur le sombre → sortir
+  path.style.pointerEvents = 'none';
   g.appendChild(path);
 }
 
 function hudMakeIsolable(el, entry) {
-  if (!entry || !entry.rect) return; // sans emprise → pas d'isolation possible
-  el.style.pointerEvents = 'auto';
-  el.style.cursor = 'pointer';
-  el.onclick = (e) => { e.stopPropagation(); hudIsolatedRoom = entry; hudUpdate(); };
+  // Isolation au clic désactivée : le HUD ne capte plus aucun événement tactile,
+  // ce qui garantit que le menu et la navigation restent interactifs en vue de dessus.
+  return;
 }
 
 /* Recalcule et redessine tout le HUD (appelé chaque frame en vue de dessus). */
