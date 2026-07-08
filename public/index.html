@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appartement T3 RAMBOUILLET à vendre — Laforêt</title>
+<style>
+  /* ============================================================
+     CHARTE LAFORÊT
+     Bleu roi #0046FE · header sombre #0B1B3F · neutres froids
+     ============================================================ */
+  :root{
+    --laforet-blue:#0046FE;
+    --laforet-blue-dark:#0035C4;
+    --header-navy:#0B1B3F;
+    --ink:#1a2233;
+    --muted:#667085;
+    --line:#e4e7ec;
+    --bg:#f7f8fa;
+    --card:#ffffff;
+    --radius:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+  }
+  img{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- BARRE DE NAVIGATION ---------- */
+  .topbar{
+    background:var(--header-navy);
+    color:#fff;
+    height:56px;
+    display:flex;
+    align-items:center;
+    padding:0 2rem;
+    gap:2rem;
+    position:sticky;top:0;z-index:50;
+  }
+  .brand{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.25rem;letter-spacing:.02em;}
+  .brand .tree{width:22px;height:22px;}
+  .nav{display:flex;gap:1.6rem;font-size:.85rem;font-weight:500;color:#c7d0e0;}
+  .nav span{cursor:pointer;}
+  .nav span:hover{color:#fff;}
+  .topbar-spacer{flex:1;}
+  .topbar-cta{background:var(--laforet-blue);color:#fff;padding:.5rem 1rem;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;}
+
+  /* ---------- CONTENEUR ---------- */
+  .wrap{max-width:1080px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .listing-title{font-size:1.6rem;font-weight:800;margin-bottom:.25rem;}
+  .listing-ref{color:var(--laforet-blue);font-size:.85rem;font-weight:600;margin-bottom:1.25rem;}
+
+  /* ---------- GALERIE PHOTOS (placeholders) ---------- */
+  .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;margin-bottom:.75rem;}
+  .ph{border-radius:var(--radius);position:relative;overflow:hidden;background:#c9d4e8;}
+  .ph .lbl{position:absolute;bottom:8px;left:8px;background:rgba(11,27,63,.7);color:#fff;font-size:.7rem;padding:.2rem .5rem;border-radius:4px;}
+  .ph-main{grid-row:1 / span 2;min-height:340px;background:linear-gradient(135deg,#aebfe0,#c9d4e8);}
+  .ph-1{background:linear-gradient(135deg,#b6c7a8,#cfe0c2);}
+  .ph-2{background:linear-gradient(135deg,#e0c8a8,#efe0cf);}
+  .ph-3{background:linear-gradient(135deg,#a8c8e0,#cfe0ef);}
+  .ph-4{background:linear-gradient(135deg,#c0b6e0,#d6cfef);display:flex;align-items:center;justify-content:center;}
+  .ph-4 .more{color:#fff;font-weight:600;font-size:.8rem;background:rgba(11,27,63,.55);padding:.4rem .7rem;border-radius:6px;}
+
+  /* ---------- BANDEAU VISITE 3D (le call-to-action signature) ---------- */
+  .tour-banner{
+    margin:1rem 0 2rem;
+    background:linear-gradient(100deg,var(--laforet-blue),#1f63ff);
+    border-radius:var(--radius);
+    padding:1.4rem 1.6rem;
+    display:flex;align-items:center;gap:1.2rem;
+    color:#fff;
+  }
+  .tour-banner .ico{
+    width:46px;height:46px;border-radius:50%;
+    background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;
+  }
+  .tour-banner .txt{flex:1;}
+  .tour-banner .txt b{font-size:1.05rem;display:block;}
+  .tour-banner .txt small{opacity:.85;font-size:.82rem;}
+  .tour-btn{
+    background:#fff;color:var(--laforet-blue);
+    padding:.7rem 1.4rem;border-radius:8px;
+    font-weight:700;font-size:.9rem;cursor:pointer;border:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  .tour-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.18);}
+
+  /* ---------- LAYOUT 2 COLONNES ---------- */
+  .columns{display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;}
+  @media(max-width:880px){.columns{grid-template-columns:1fr;}}
+
+  /* prix */
+  .price{font-size:1.7rem;font-weight:800;}
+  .price-sub{color:var(--muted);font-size:.85rem;margin-bottom:.5rem;}
+  .badges{display:flex;gap:.5rem;margin:.75rem 0 1.5rem;}
+  .badge{background:#eef2ff;color:var(--laforet-blue);font-size:.78rem;font-weight:600;padding:.3rem .7rem;border-radius:999px;}
+
+  /* onglets */
+  .tabs{display:flex;gap:1.5rem;border-bottom:1px solid var(--line);margin-bottom:1.5rem;font-size:.88rem;font-weight:600;}
+  .tabs span{padding:.6rem 0;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tabs span.active{color:var(--laforet-blue);border-color:var(--laforet-blue);}
+
+  h2.section{font-size:1.15rem;font-weight:700;margin:2rem 0 1rem;}
+
+  /* caractéristiques */
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+  .feature{display:flex;align-items:center;gap:.7rem;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.8rem;}
+  .feature .fi{width:34px;height:34px;border-radius:7px;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+  .feature small{color:var(--muted);display:block;font-size:.72rem;}
+  .feature b{font-size:.9rem;}
+
+  .desc p{margin-bottom:.8rem;color:#3a4456;font-size:.92rem;}
+
+  /* DPE */
+  .dpe{display:flex;gap:6px;align-items:flex-end;height:140px;margin:1rem 0;}
+  .dpe .bar{flex:1;border-radius:4px 4px 0 0;display:flex;align-items:flex-end;justify-content:center;color:#fff;font-weight:700;font-size:.75rem;padding-bottom:4px;}
+  .dpe .a{height:40%;background:#2bb673;}
+  .dpe .b{height:52%;background:#8cc63f;}
+  .dpe .c{height:64%;background:#f7ec2f;color:#333;}
+  .dpe .d{height:76%;background:#fcb040;}
+  .dpe .e{height:88%;background:#f7941e;}
+  .dpe .f{height:100%;background:#ed1c24;outline:3px solid var(--ink);}
+  .dpe .g{height:72%;background:#c1272d;}
+
+  /* sidebar agence */
+  .agency-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:1.5rem;position:sticky;top:76px;}
+  .agency-head{display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;}
+  .agency-logo{width:48px;height:48px;border-radius:8px;background:var(--laforet-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;}
+  .agency-head b{font-size:.92rem;}
+  .agency-head small{color:var(--muted);font-size:.78rem;}
+  .form-field{margin-bottom:.7rem;}
+  .form-field input,.form-field textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:.6rem;font-size:.85rem;font-family:inherit;}
+  .form-row{display:flex;gap:.5rem;}
+  .btn-primary{width:100%;background:var(--laforet-blue);color:#fff;border:none;border-radius:8px;padding:.8rem;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:.4rem;}
+  .btn-primary:hover{background:var(--laforet-blue-dark);}
+  .btn-ghost{width:100%;background:#fff;color:var(--laforet-blue);border:1.5px solid var(--laforet-blue);border-radius:8px;padding:.7rem;font-weight:600;font-size:.85rem;cursor:pointer;margin-bottom:.6rem;}
+  .btn-ghost:hover{background:#eef2ff;}
+
+  /* aux alentours */
+  .similar{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .sim-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .sim-ph{height:130px;background:linear-gradient(135deg,#aebfe0,#c9d4e8);}
+  .sim-body{padding:.8rem;}
+  .sim-body .p{font-weight:800;color:var(--laforet-blue);}
+  .sim-body small{color:var(--muted);font-size:.78rem;}
+
+  footer{background:var(--header-navy);color:#c7d0e0;margin-top:3rem;padding:2.5rem 1.5rem;}
+  .foot-wrap{max-width:1080px;margin:0 auto;display:flex;gap:3rem;flex-wrap:wrap;font-size:.82rem;}
+  .foot-col b{color:#fff;display:block;margin-bottom:.7rem;font-size:.9rem;}
+  .foot-col span{display:block;margin-bottom:.4rem;cursor:pointer;}
+  .foot-col span:hover{color:#fff;}
+
+  /* ============================================================
+     RESPONSIVE MOBILE
+     Hamburger + galerie carrousel + bannière empilée + onglets
+     défilables + barre d'action fixe (bouton Visite 3D toujours
+     accessible). Le desktop reste strictement inchangé.
+     ============================================================ */
+
+  /* Éléments mobile masqués par défaut (desktop) */
+  .burger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:.35rem;flex-shrink:0;}
+  .burger span{width:22px;height:2px;background:#fff;border-radius:2px;transition:.2s;}
+  .mobile-cta-bar{display:none;}
+
+  /* --- Tablette / grand téléphone : la grille passe en 1 colonne (déjà géré
+         plus haut à 880px pour .columns) ; on calme les marges. --- */
+  @media(max-width:880px){
+    .wrap{padding:1.75rem 1.25rem 3rem;}
+    .columns{grid-template-columns:1fr;gap:1.5rem;}
+    /* En grille 1fr, les pistes ont min-width:auto et ne rétrécissent pas sous la
+       largeur de leur contenu (ex. onglets non coupés) → débordement horizontal.
+       min-width:0 autorise la piste à rétrécir, le contenu scrolle/se réajuste. */
+    .columns > *{min-width:0;}
+  }
+
+  /* --- TÉLÉPHONE (≤768px) : traitement mobile complet --- */
+  @media(max-width:768px){
+    .wrap{padding:1.1rem 1rem 1.5rem;}
+
+    /* Barre de navigation : hamburger + menu déroulant */
+    .topbar{height:52px;padding:0 1rem;gap:.8rem;}
+    .brand{font-size:1.1rem;}
+    .burger{display:flex;}
+    .topbar-cta{font-size:.76rem;padding:.42rem .7rem;}
+    .nav{
+      display:none;
+      position:absolute;top:52px;left:0;right:0;
+      background:var(--header-navy);
+      flex-direction:column;gap:0;
+      padding:.4rem 1rem 1rem;
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+    }
+    .nav-cb:checked ~ .nav{display:flex;}
+    .nav span{padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.92rem;}
+
+    /* Titre */
+    .listing-title{font-size:1.3rem;}
+
+    /* GALERIE → carrousel horizontal à défilement (scroll-snap) */
+    .gallery{
+      display:flex;
+      grid-template-columns:none;grid-template-rows:none;
+      overflow-x:auto;gap:8px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;
+      margin-bottom:1rem;
+    }
+    .gallery::-webkit-scrollbar{display:none;}
+    .ph{
+      flex:0 0 86%;
+      height:230px;min-height:0;
+      scroll-snap-align:center;
+    }
+    .ph-main{grid-row:auto;min-height:0;height:230px;}
+
+    /* BANNIÈRE 3D : empilée, bouton pleine largeur */
+    .tour-banner{
+      flex-direction:column;align-items:flex-start;
+      gap:.9rem;padding:1.2rem;margin:.5rem 0 1.75rem;
+    }
+    .tour-btn{width:100%;text-align:center;padding:.85rem;}
+
+    /* ONGLETS : défilables horizontalement, pas de retour à la ligne */
+    .tabs{
+      overflow-x:auto;flex-wrap:nowrap;gap:1.2rem;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    }
+    .tabs::-webkit-scrollbar{display:none;}
+    .tabs span{white-space:nowrap;flex:0 0 auto;}
+
+    /* Carte agence : ne plus la rendre collante une fois empilée */
+    .agency-card{position:static;top:auto;}
+
+    /* BARRE D'ACTION FIXE EN BAS — bouton Visite 3D toujours à portée */
+    .mobile-cta-bar{
+      display:flex;gap:.6rem;
+      position:fixed;left:0;right:0;bottom:0;z-index:60;
+      background:#fff;border-top:1px solid var(--line);
+      padding:.7rem 1rem;
+      box-shadow:0 -4px 16px rgba(11,27,63,.12);
+    }
+    .mcta-primary{
+      flex:1.4;background:var(--laforet-blue);color:#fff;border:none;
+      border-radius:8px;padding:.85rem;font-weight:700;font-size:.92rem;cursor:pointer;
+      text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;
+    }
+    .mcta-primary:active{background:var(--laforet-blue-dark);}
+    .mcta-secondary{
+      flex:1;background:#fff;color:var(--laforet-blue);border:1.5px solid var(--laforet-blue);
+      border-radius:8px;padding:.85rem;font-weight:600;font-size:.9rem;cursor:pointer;
+    }
+    /* espace pour ne pas masquer le bas de page derrière la barre fixe */
+    body{padding-bottom:74px;}
+  }
+
+  /* --- TRÈS PETIT ÉCRAN (≤430px) : on resserre encore --- */
+  @media(max-width:430px){
+    .topbar-cta{display:none;}            /* place au hamburger + marque */
+    .feature-grid{grid-template-columns:1fr;}
+    .similar{grid-template-columns:1fr;}
+    .price{font-size:1.5rem;}
+    .listing-title{font-size:1.2rem;}
+    .ph{flex:0 0 90%;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<div class="topbar">
+  <div class="brand">
+    <svg class="tree" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 12h3l-2 4h4l-2 4h10l-2-4h4l-2-4h3L12 2z" fill="#fff"/><rect x="11" y="18" width="2" height="4" fill="#fff"/></svg>
+    LAFORÊT
+  </div>
+  <input type="checkbox" id="nav-toggle" class="nav-cb" hidden>
+  <div class="nav" id="main-nav">
+    <span>Estimer</span><span>Vendre</span><span>Acheter</span><span>Louer</span><span>Faire gérer</span><span>Syndic</span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-cta">Trouver une agence</div>
+  <label for="nav-toggle" class="burger" aria-label="Ouvrir le menu"><span></span><span></span><span></span></label>
+</div>
+
+<div class="wrap">
+  <h1 class="listing-title">Appartement T3 RAMBOUILLET à vendre</h1>
+  <div class="listing-ref">Rambouillet (78) · Réf. RAMB-2026</div>
+
+  <!-- GALERIE (placeholders colorés) -->
+  <div class="gallery">
+    <div class="ph ph-main"><span class="lbl">Séjour</span></div>
+    <div class="ph ph-1"><span class="lbl">Cuisine</span></div>
+    <div class="ph ph-2"><span class="lbl">Chambre 1</span></div>
+    <div class="ph ph-3"><span class="lbl">Salle de bain</span></div>
+    <div class="ph ph-4"><span class="more">+ 6 photos</span></div>
+  </div>
+
+  <!-- BANNIÈRE VISITE 3D -->
+  <div class="tour-banner">
+    <div class="ico">🏠</div>
+    <div class="txt">
+      <b>Visite virtuelle 3D disponible</b>
+      <small>Explorez l'appartement en 3D, pièce par pièce, depuis chez vous.</small>
+    </div>
+    <button class="tour-btn" onclick="window.location.href='viewer.html?property=demo-rambouillet'">
+      ▶ Lancer la visite 3D
+    </button>
+  </div>
+
+  <!-- 2 COLONNES -->
+  <div class="columns">
+    <div class="main-col">
+      <div class="price">350 000 €</div>
+      <div class="price-sub">soit 5 384 €/m² · honoraires charge vendeur</div>
+      <div class="badges">
+        <span class="badge">65 m²</span>
+        <span class="badge">3 pièces</span>
+        <span class="badge">2 chambres</span>
+        <span class="badge">2ᵉ étage</span>
+      </div>
+
+      <div class="tabs">
+        <span class="active">Présentation</span>
+        <span>Caractéristiques</span>
+        <span>Description</span>
+        <span>Emplacement</span>
+        <span>Bilan énergétique</span>
+      </div>
+
+      <h2 class="section">Caractéristiques</h2>
+      <div class="feature-grid">
+        <div class="feature"><div class="fi">📐</div><div><small>Surface</small><b>65 m²</b></div></div>
+        <div class="feature"><div class="fi">🛏️</div><div><small>Chambres</small><b>2 chambres</b></div></div>
+        <div class="feature"><div class="fi">🍽️</div><div><small>Pièces</small><b>3 pièces</b></div></div>
+        <div class="feature"><div class="fi">🔥</div><div><small>Chauffage</small><b>Individuel</b></div></div>
+        <div class="feature"><div class="fi">🏢</div><div><small>Étage</small><b>2ᵉ / 4</b></div></div>
+        <div class="feature"><div class="fi">📅</div><div><small>Disponibilité</small><b>Immédiate</b></div></div>
+      </div>
+
+      <h2 class="section">Description</h2>
+      <div class="desc">
+        <p>Situé au cœur de Rambouillet, cet appartement de type T3 offre une surface de 65 m² baignée de lumière. Il se compose d'un séjour spacieux ouvert sur une cuisine aménagée, de deux chambres et d'une salle de bain moderne.</p>
+        <p>Proche des commerces, des écoles et de la gare, ce bien attractif constitue une excellente opportunité pour une première acquisition ou un investissement locatif. Copropriété de 24 lots, charges annuelles ~1 200 €.</p>
+        <p>Référence agence : RAMB-2026.</p>
+      </div>
+
+      <h2 class="section">Performance énergétique</h2>
+      <div class="dpe">
+        <div class="bar a">A</div><div class="bar b">B</div><div class="bar c">C</div>
+        <div class="bar d">D</div><div class="bar e">E</div><div class="bar f">F</div><div class="bar g">G</div>
+      </div>
+      <p style="color:var(--muted);font-size:.85rem;">Classe énergie : F · Logement à consommation énergétique excessive.</p>
+    </div>
+
+    <!-- SIDEBAR AGENCE -->
+    <aside>
+      <div class="agency-card">
+        <div class="agency-head">
+          <div class="agency-logo">L</div>
+          <div>
+            <b>Agence Laforêt Rambouillet</b><br>
+            <small>12 rue du Général Leclerc, 78120</small>
+          </div>
+        </div>
+        <button class="btn-ghost" onclick="window.location.href='viewer.html?property=demo-rambouillet'">🏠 Visite virtuelle 3D</button>
+        <div class="form-field"><div class="form-row"><input placeholder="Nom *"><input placeholder="Prénom *"></div></div>
+        <div class="form-field"><input placeholder="Email *"></div>
+        <div class="form-field"><input placeholder="Téléphone *"></div>
+        <div class="form-field"><textarea rows="3" placeholder="Votre message"></textarea></div>
+        <button class="btn-primary">Envoyer ma demande</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- AUX ALENTOURS -->
+  <h2 class="section">Aux alentours</h2>
+  <div class="similar">
+    <div class="sim-card">
+      <div class="sim-ph"></div>
+      <div class="sim-body"><div class="p">399 000 €</div><small>Appartement · Rambouillet (78) · 72 m²</small></div>
+    </div>
+    <div class="sim-card">
+      <div class="sim-ph" style="background:linear-gradient(135deg,#e0c8a8,#efe0cf);"></div>
+      <div class="sim-body"><div class="p">315 000 €</div><small>Appartement · Rambouillet (78) · 60 m²</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- BARRE D'ACTION FIXE (MOBILE uniquement) -->
+<div class="mobile-cta-bar">
+  <button class="mcta-secondary" onclick="document.querySelector('.agency-card').scrollIntoView({behavior:'smooth',block:'center'})">Contacter</button>
+  <button class="mcta-primary" onclick="window.location.href='viewer.html?property=demo-rambouillet'">▶ Visite 3D</button>
+</div>
+
+<footer>
+  <div class="foot-wrap">
+    <div class="foot-col">
+      <b>LAFORÊT RAMBOUILLET</b>
+      <span>12 rue du Général Leclerc</span>
+      <span>78120 Rambouillet</span>
+      <span>01 34 00 00 00</span>
+    </div>
+    <div class="foot-col">
+      <b>Acheter</b>
+      <span>Acheter un appartement</span>
+      <span>Acheter une maison</span>
+    </div>
+    <div class="foot-col">
+      <b>Louer</b>
+      <span>Louer un appartement</span>
+      <span>Louer une maison</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
