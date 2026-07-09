@@ -1042,7 +1042,7 @@ async function init() {
   camera.angularSensibilityX = 1000;  // rotation horizontale (défaut — plus "lourde" que 800)
   camera.angularSensibilityY = 1000;  // rotation verticale (défaut)
   camera.panningSensibility = 300;     // translation au clic droit (diviseur = plus haut = plus lent)
-  camera.panningInertia = 0.9;        // amortissement translation (défaut)
+  camera.panningInertia = 0.7;        // amortissement translation : aligné sur la rotation (0.7) → la translation stoppe aussi franchement après un lâcher rapide (0.9 = défaut Sandbox)
   camera.panningAxis = new BABYLON.Vector3(1, 1, 0); // pan dans le plan écran (défaut Sandbox)
   camera.wheelPrecision = 15;         // zoom molette très adouci (plus haut = plus doux)
   camera.pinchPrecision = 120;        // zoom pincement tactile TRÈS adouci (plus haut = plus doux, ~10x moins fort)
