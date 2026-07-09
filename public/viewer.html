@@ -974,29 +974,31 @@ async function init() {
     if (panel) panel.classList.toggle('closed', !isPoiPanelOpen);
   })();
 
+  // Appareil tactile (tablette / mobile) ? Sert à alléger la charge GPU UNIQUEMENT
+  // sur ces appareils — le rendu desktop reste strictement identique.
+  const IS_TOUCH = ((navigator.maxTouchPoints || 0) > 0) ||
+    (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+
   engine = new BABYLON.Engine(canvas, true, {
-    preserveDrawingBuffer: true,
+    // preserveDrawingBuffer RETIRÉ : aucun code ne relit le back-buffer (capturePOV ne
+    // fait que lire la position/cible de la caméra). Ce flag doublait la mémoire GPU du
+    // back-buffer ; sur iPad/Safari EN PAYSAGE (grand panneau en verre dépoli + recadrage
+    // animé), le budget GPU était dépassé → perte de contexte WebGL (le « refresh » vu au
+    // 1er repli du menu) puis écran blanc au 2e. Le retrait est sans effet fonctionnel.
     stencil: true,
-    antialias: true,
+    // MSAA coûteux en mémoire sur iOS : désactivé sur tablette/mobile (le FXAA du pipeline
+    // de compositing lisse déjà les bords). Desktop : MSAA conservé, rendu inchangé.
+    antialias: !IS_TOUCH,
     adaptToDeviceRatio: true,
   });
 
-  // ========== ANTI-PERTE DE CONTEXTE WebGL (tablette / mobile Retina) ==========
-  // Sur écran haute densité (DPR 2–3, typique des tablettes), adaptToDeviceRatio
-  // gonfle le backbuffer à 4–9× la surface CSS. Combiné à preserveDrawingBuffer, au
-  // MSAA, à la shadow map et au pipeline de compositing, la mémoire GPU dépasse le
-  // budget de l'appareil : le contexte WebGL est perdu lors d'une transition (repli
-  // du menu → recadrage). 1re perte = flash de rechargement (le « refresh » observé) ;
-  // 2e perte = écran blanc + erreur. On plafonne le ratio effectif : rendu toujours
-  // net, mémoire GPU divisée par ~2 à 4 → plus de perte de contexte. Desktop (DPR 1) :
-  // strictement inchangé (la condition n'agit que sur les écrans DPR > 1.5).
-  const MAX_EFFECTIVE_DPR = 1.5;
-  const minHwScaling = 1 / MAX_EFFECTIVE_DPR;   // hardwareScalingLevel = 1 / DPR effectif
+  // Écran haute densité (DPR 2–3, tablettes) : on plafonne le ratio effectif à 1.5 pour
+  // que le back-buffer ET les cibles plein écran (bloom, netteté, FXAA) tiennent dans le
+  // budget GPU. Rendu net. Desktop DPR 1 : condition inactive → inchangé.
   try {
-    if (engine.getHardwareScalingLevel() < minHwScaling) {
-      engine.setHardwareScalingLevel(minHwScaling);
-    }
-  } catch (e) { /* API absente : on garde le comportement par défaut */ }
+    const minHwScaling = 1 / 1.5;
+    if (engine.getHardwareScalingLevel() < minHwScaling) engine.setHardwareScalingLevel(minHwScaling);
+  } catch (e) { /* API absente : comportement par défaut conservé */ }
 
   scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(0.039, 0.078, 0.149, 1);
@@ -1019,10 +1021,7 @@ async function init() {
         engine.resize();                // resynchronise la taille du moteur sur le canvas
         if (typeof relayout === 'function') relayout(); // recadre la vue courante
         if (typeof hudUpdate === 'function') hudUpdate(); // redessine les cotations à la bonne échelle
-        // Force une frame immédiate : reconstruit tout de suite les ressources GPU
-        // (ombres, pipeline de compositing) au lieu d'attendre la boucle suivante,
-        // pour qu'une éventuelle 2e perte ne laisse jamais un écran figé/blanc.
-        if (scene) { try { scene.render(); } catch (_) {} }
+        if (scene) { try { scene.render(); } catch (_) {} } // frame immédiate → jamais d'écran figé/blanc
         console.log('✅ Contexte WebGL restauré — affichage recalé');
       } catch (e) {
         console.warn('Erreur pendant la récupération du contexte :', e);
