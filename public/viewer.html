@@ -1038,7 +1038,7 @@ async function init() {
 
   // === PARAMÈTRES EXACTS DU SANDBOX BABYLON.JS (valeurs par défaut de l'ArcRotateCamera) ===
   // Clic gauche = rotation, clic droit = translation (mapping par défaut, rien à remapper)
-  camera.inertia = 0.9;               // amortissement rotation/zoom (défaut)
+  camera.inertia = 0.7;               // amortissement rotation/zoom : 0.7 = arrêt franc après un lâcher rapide (0.9 = défaut Sandbox, glisse ~1 s ; 0.7 stoppe vite en restant fluide)
   camera.angularSensibilityX = 1000;  // rotation horizontale (défaut — plus "lourde" que 800)
   camera.angularSensibilityY = 1000;  // rotation verticale (défaut)
   camera.panningSensibility = 300;     // translation au clic droit (diviseur = plus haut = plus lent)
