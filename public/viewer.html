@@ -981,6 +981,23 @@ async function init() {
     adaptToDeviceRatio: true,
   });
 
+  // ========== ANTI-PERTE DE CONTEXTE WebGL (tablette / mobile Retina) ==========
+  // Sur écran haute densité (DPR 2–3, typique des tablettes), adaptToDeviceRatio
+  // gonfle le backbuffer à 4–9× la surface CSS. Combiné à preserveDrawingBuffer, au
+  // MSAA, à la shadow map et au pipeline de compositing, la mémoire GPU dépasse le
+  // budget de l'appareil : le contexte WebGL est perdu lors d'une transition (repli
+  // du menu → recadrage). 1re perte = flash de rechargement (le « refresh » observé) ;
+  // 2e perte = écran blanc + erreur. On plafonne le ratio effectif : rendu toujours
+  // net, mémoire GPU divisée par ~2 à 4 → plus de perte de contexte. Desktop (DPR 1) :
+  // strictement inchangé (la condition n'agit que sur les écrans DPR > 1.5).
+  const MAX_EFFECTIVE_DPR = 1.5;
+  const minHwScaling = 1 / MAX_EFFECTIVE_DPR;   // hardwareScalingLevel = 1 / DPR effectif
+  try {
+    if (engine.getHardwareScalingLevel() < minHwScaling) {
+      engine.setHardwareScalingLevel(minHwScaling);
+    }
+  } catch (e) { /* API absente : on garde le comportement par défaut */ }
+
   scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(0.039, 0.078, 0.149, 1);
 
@@ -1002,6 +1019,10 @@ async function init() {
         engine.resize();                // resynchronise la taille du moteur sur le canvas
         if (typeof relayout === 'function') relayout(); // recadre la vue courante
         if (typeof hudUpdate === 'function') hudUpdate(); // redessine les cotations à la bonne échelle
+        // Force une frame immédiate : reconstruit tout de suite les ressources GPU
+        // (ombres, pipeline de compositing) au lieu d'attendre la boucle suivante,
+        // pour qu'une éventuelle 2e perte ne laisse jamais un écran figé/blanc.
+        if (scene) { try { scene.render(); } catch (_) {} }
         console.log('✅ Contexte WebGL restauré — affichage recalé');
       } catch (e) {
         console.warn('Erreur pendant la récupération du contexte :', e);
@@ -3905,20 +3926,58 @@ function resetPlacement() {
     })(t0);
   }
 
-  // La feuille glisse PAR-DESSUS un rendu 3D qui reste plein écran et stable, sur
-  // mobile comme sur desktop/tablette. On ne redimensionne PLUS le canvas à chaque
-  // ouverture/fermeture de la feuille : ces engine.resize() répétés provoquaient un
-  // « flash » de recadrage à chaque fermeture puis, après quelques bascules, une
-  // perte de contexte WebGL → écran blanc. Seule tâche restante : si le canvas porte
-  // une taille inline héritée, la retirer pour repasser plein écran. L'aspect suit la
-  // rotation via le resize global (window 'resize' → engine.resize()), pas les taps.
+  // Adapte la 3D à l'espace RÉELLEMENT visible : on réduit le canvas à la bande
+  // au-dessus de la feuille (portrait) ou à sa gauche (paysage), puis on recadre le
+  // modèle pour qu'il tienne entièrement dedans. Marche en NAVIGATION comme en VUE DE
+  // DESSUS, pour n'importe quelle position du menu. Desktop/tablette : canvas plein.
   function fitCanvasToBand(animate){
     const cv = document.getElementById('canvas');
     if (!cv || typeof engine === 'undefined' || !engine || typeof camera === 'undefined' || !camera) return;
-    if (cv.style.width || cv.style.height){
-      cv.style.width = ''; cv.style.height = '';
-      engine.resize();
-      if (!isMobile() && typeof reframeForPanel === 'function') reframeForPanel(false);
+
+    // Desktop / tablette : canvas plein écran (c'est le viewport largeur qui gère le panneau droite).
+    if (!isMobile()){
+      if (cv.style.width || cv.style.height){
+        cv.style.width = ''; cv.style.height = '';
+        engine.resize();
+        if (typeof reframeForPanel === 'function') reframeForPanel(false);
+      }
+      return;
+    }
+
+    // Réduit le canvas à la bande visible.
+    const m = metrics();
+    const target = m.pos[detent];
+    const rect = container.getBoundingClientRect();
+    if (m.axis === 'y'){
+      const H = rect.height || (window.innerHeight * 0.5);
+      cv.style.width = '';
+      cv.style.height = Math.max(140, Math.round(window.innerHeight - H + target)) + 'px'; // du haut au sommet de la feuille
+    } else {
+      const W = rect.width || Math.min(340, window.innerWidth * 0.46);
+      cv.style.height = '';
+      cv.style.width = Math.max(180, Math.round(window.innerWidth - W + target)) + 'px';    // de gauche au bord de la feuille
+    }
+    engine.resize();   // le moteur relit la nouvelle taille → aspect à jour
+
+    // Recadre le modèle dans le canvas redimensionné, sans se faire brider par les
+    // limites de zoom (calées sur le plein écran).
+    if (!modelBounds) return;
+    const topView = (typeof isTopView !== 'undefined' && isTopView);
+    const fp = (typeof isFirstPerson !== 'undefined' && isFirstPerson);
+    if (fp) return;    // en POV (photo plein écran) : rien à recadrer côté 3D
+
+    const fitR = topView
+      ? computeTopViewRadiusForViewport(1)
+      : computeFitRadiusForViewport(1);
+
+    camera.lowerRadiusLimit = null;
+    camera.upperRadiusLimit = null;
+    camera.targetScreenOffset.x = 0; camera.targetScreenOffset.y = 0;
+    camera.target = modelBounds.center.clone();
+    camera.radius = fitR;
+    if (!topView){
+      camera.lowerRadiusLimit = modelBounds.radius * CONFIG.zoomInLimitRatio;
+      camera.upperRadiusLimit = Math.max(fitR, (initialFraming ? initialFraming.radius : fitR) * CONFIG.zoomOutLimitRatio);
     }
   }
 
